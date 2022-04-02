@@ -67,6 +67,11 @@ export class MyEditor extends React.Component {
   render() {
     const { editorState } = this.state;
 
+    this.socket.on("document change", function (msg) {
+      // this.setState({ editorState: JSON.parse(msg) });
+      console.log("message from ws ", msg);
+    });
+
     // If the user changes block type before entering any text, we can
     // either style the placeholder or hide it. Let's just hide it now.
     let className = "RichEditor-editor";
@@ -76,11 +81,6 @@ export class MyEditor extends React.Component {
         className += " RichEditor-hidePlaceholder";
       }
     }
-
-    this.socket.on("document change", function (msg) {
-      this.setState(JSON.parse(msg));
-      console.log("message from ws ", msg);
-    });
 
     const fileData = JSON.stringify(contentState);
     console.log(fileData);
