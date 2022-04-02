@@ -12,14 +12,14 @@ import { io } from "socket.io-client";
 const { Editor, EditorState, RichUtils, getDefaultKeyBinding } = Draft;
 
 export class MyEditor extends React.Component {
-  socket = null;
+  socket = io("https://decentradocbackend.herokuapp.com/");
   constructor(props) {
     super(props);
     this.state = { editorState: EditorState.createEmpty() };
 
     this.focus = () => this.refs.editor.focus();
     this.onChange = (editorState) => {
-      console.log("props", this.props);
+      console.log("props", this.socket);
       this?.socket?.emit("document change", JSON.stringify(editorState));
       return this.setState({ editorState });
     };
@@ -28,9 +28,6 @@ export class MyEditor extends React.Component {
     this.mapKeyToEditorCommand = this._mapKeyToEditorCommand.bind(this);
     this.toggleBlockType = this._toggleBlockType.bind(this);
     this.toggleInlineStyle = this._toggleInlineStyle.bind(this);
-
-    const webSocketUrl = "https://decentradocbackend.herokuapp.com/";
-    this.socket = io(webSocketUrl);
   }
   // console.log(editorState);
   _handleKeyCommand(command, editorState) {
@@ -79,6 +76,11 @@ export class MyEditor extends React.Component {
         className += " RichEditor-hidePlaceholder";
       }
     }
+
+    this.socket.on("document change", function (msg) {
+      this.setState(JSON.parse(msg));
+      console.log("message from ws ", msg);
+    });
 
     const fileData = JSON.stringify(contentState);
     console.log(fileData);
