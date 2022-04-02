@@ -1,11 +1,7 @@
-import { useEffect, useState } from "react";
-import { ethers } from "ethers";
 import "./App.css";
 
 import React from "react";
 import Draft from "draft-js";
-
-import { contractAbi, contractAddress } from "./utils/constants";
 
 const { Editor, EditorState, RichUtils, getDefaultKeyBinding } = Draft;
 
@@ -60,8 +56,6 @@ class MyEditor extends React.Component {
   render() {
     const { editorState } = this.state;
 
-    console.log(editorState.getCurrentContent());
-
     // If the user changes block type before entering any text, we can
     // either style the placeholder or hide it. Let's just hide it now.
     let className = "RichEditor-editor";
@@ -71,6 +65,9 @@ class MyEditor extends React.Component {
         className += " RichEditor-hidePlaceholder";
       }
     }
+
+    const fileData = JSON.stringify(contentState);
+    console.log(fileData);
 
     return (
       <div className="RichEditor-root">
@@ -204,62 +201,6 @@ const InlineStyleControls = (props) => {
 };
 
 function App() {
-  const [currentAccount, setCurrentAccount] = useState("");
-
-  const { ethereum } = window;
-
-  const getEthereumContract = () => {
-    const provider = new ethers.providers.Web3Provider(ethereum);
-    const signer = provider.getSigner();
-    const decentraDocContract = new ethers.Contract(
-      contractAddress,
-      contractAbi,
-      signer
-    );
-
-    return decentraDocContract;
-  };
-
-  const checkWalletConnection = async () => {
-    try {
-      if (!ethereum) return alert("Please install metamask");
-
-      const accounts = await ethereum.request({ method: "eth_accounts" });
-
-      if (accounts.length) {
-        setCurrentAccount(accounts[0]);
-      } else {
-        console.log("No accounts found");
-      }
-
-      console.log(accounts);
-    } catch (error) {
-      console.log(error);
-
-      throw new Error("No ethereum object");
-    }
-  };
-
-  const connectWallet = async () => {
-    try {
-      if (!ethereum) return alert("Please install metamask");
-
-      const accounts = await ethereum.request({
-        method: "eth_requestAccounts",
-      });
-
-      setCurrentAccount(accounts[0]);
-    } catch (error) {
-      console.log(error);
-
-      throw new Error("No ethereum object");
-    }
-  };
-
-  useEffect(() => {
-    checkWalletConnection();
-  }, []);
-
   return (
     <div className="App">
       <MyEditor />
