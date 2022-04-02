@@ -1,9 +1,11 @@
-import { useEffect } from "react";
-import logo from "./logo.svg";
+import { useEffect, useState } from "react";
+import { ethers } from "ethers";
 import "./App.css";
 
 import React from "react";
 import Draft from "draft-js";
+
+import { contractAbi, contractAddress } from "./utils/constants";
 
 const { Editor, EditorState, RichUtils, getDefaultKeyBinding } = Draft;
 
@@ -202,6 +204,8 @@ const InlineStyleControls = (props) => {
 };
 
 function App() {
+  const [currentAccount, setCurrentAccount] = useState("");
+
   const { ethereum } = window;
 
   const getEthereumContract = () => {
