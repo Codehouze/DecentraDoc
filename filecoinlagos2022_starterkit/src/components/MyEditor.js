@@ -9,18 +9,23 @@ import {
 } from "./styleMap";
 import { io } from "socket.io-client";
 
-const { Editor, EditorState, RichUtils, getDefaultKeyBinding } = Draft;
+const { Editor, EditorState, RichUtils, getDefaultKeyBinding, ContentState } =
+  Draft;
 
 export class MyEditor extends React.Component {
   socket = io("https://decentradocbackend.herokuapp.com/");
+
   constructor(props) {
     super(props);
     this.state = { editorState: EditorState.createEmpty() };
 
     this.focus = () => this.refs.editor.focus();
     this.onChange = (editorState) => {
-      console.log("props", this.socket);
-      this?.socket?.emit("document change", JSON.stringify(editorState));
+      console.log("props", JSON.stringify(editorState.getCurrentContent()));
+      this?.socket?.emit(
+        "document change",
+        JSON.stringify(editorState.getCurrentContent())
+      );
       return this.setState({ editorState });
     };
 
@@ -29,6 +34,19 @@ export class MyEditor extends React.Component {
     this.toggleBlockType = this._toggleBlockType.bind(this);
     this.toggleInlineStyle = this._toggleInlineStyle.bind(this);
   }
+
+  componentDidMount() {
+    this.socket.on("document change", (msg) => {
+      console.log(JSON.parse(msg));
+      this.setState({
+        editorState: EditorState.createWithContent(
+          ContentState.createFromText("Hello world")
+        ),
+      });
+      console.log("message from ws ", msg);
+    });
+  }
+
   // console.log(editorState);
   _handleKeyCommand(command, editorState) {
     const newState = RichUtils.handleKeyCommand(editorState, command);
@@ -67,11 +85,6 @@ export class MyEditor extends React.Component {
   render() {
     const { editorState } = this.state;
 
-    this.socket.on("document change", function (msg) {
-      // this.setState({ editorState: JSON.parse(msg) });
-      console.log("message from ws ", msg);
-    });
-
     // If the user changes block type before entering any text, we can
     // either style the placeholder or hide it. Let's just hide it now.
     let className = "RichEditor-editor";
@@ -82,8 +95,8 @@ export class MyEditor extends React.Component {
       }
     }
 
-    const fileData = JSON.stringify(contentState);
-    console.log(fileData);
+    // const fileData = JSON.stringify(contentState);
+    // console.log(fileData);
 
     return (
       <div className="RichEditor-root">
